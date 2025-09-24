@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Struktur Organisasi HSJA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom styles untuk transisi sidebar dan scrollbar minimalis */
+      body {
+        background-color: #f0f9ff; /* light sky blue background */
+      }
+      .sidebar {
+        transition: transform 0.3s ease-in-out;
+      }
+      .sidebar-open {
+        transform: translateX(0);
+      }
+      .sidebar-closed {
+        transform: translateX(100%);
+      }
+      /* Style untuk scrollbar di grid (opsional) */
+      .member-grid-container::-webkit-scrollbar {
+        width: 8px;
+      }
+      .member-grid-container::-webkit-scrollbar-track {
+        background: #f0f9ff;
+      }
+      .member-grid-container::-webkit-scrollbar-thumb {
+        background-color: #38bdf8; /* sky-400 */
+        border-radius: 20px;
+      }
+    </style>
+  </head>
+  <body class="bg-sky-50 text-slate-800">
+    <header class="bg-sky-500 shadow-md">
+      <div class="flex items-center justify-between py-6 px-6">
+        <div class="flex items-center">
+          <img
+            class="w-16 h-16 rounded-full"
+            src="/Asset/LogoHsja-removebg-preview.png"
+            alt=""
+          />
+          <h1 class="text-2xl font-bold text-white ml-4">
+            Struktur Organisasi HSJA
+          </h1>
+        </div>
+
+        <a
+          class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 hover:font-semibold transition-colors duration-300"
+          href=""
+          >Beranda</a
+        >
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+      <div class="mb-8 max-w-lg mx-auto">
+        <input
+          type="text"
+          id="search-bar"
+          placeholder="Cari berdasarkan nama atau jabatan..."
+          class="w-full px-4 py-3 bg-white border-2 border-sky-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 transition"
+        />
+      </div>
+
+      <div
+        id="member-grid"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
+      ></div>
+      <p id="no-results" class="text-center text-slate-500 mt-8 hidden">
+        Anggota tidak ditemukan.
+      </p>
+    </main>
+
+    <footer class="bg-sky-600 text-white text-center py-4 mt-12">
+      <p>&copy; 2025 HSJAorganisasi. All Rights Reserved.</p>
+    </footer>
+
+    <div
+      id="sidebar"
+      class="sidebar sidebar-closed fixed top-0 right-0 h-full w-80 md:w-96 bg-white shadow-2xl z-50 p-6 overflow-y-auto"
+    >
+      <button
+        id="close-sidebar"
+        class="absolute top-4 right-4 text-3xl text-slate-500 hover:text-sky-500 transition"
+      >
+        &times;
+      </button>
+
+      <div
+        id="sidebar-content"
+        class="flex flex-col items-center text-center mt-8"
+      ></div>
+    </div>
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"
+    ></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DATA ANGGOTA ---
+        // Foto menggunakan placeholder dari picsum.photos untuk kemudahan.
+        // Ganti URL gambar di `imageUrl` dengan path file gambar manual Anda (misal: "images/nama_foto.jpg").
+        const members = [
+          {
+            id: 1,
+            name: "Aditya Pratama",
+            class: "XII IPA 1",
+            position: "Ketua Umum",
+            quote: "Pemimpin sejati adalah yang mampu melayani.",
+            hobby: "Membaca Buku Strategi",
+            imageUrl: "https://picsum.photos/seed/aditya/200",
+          },
+          {
+            id: 2,
+            name: "Bunga Citra Lestari",
+            class: "XII IPS 2",
+            position: "Wakil Ketua Umum",
+            quote: "Kerja sama adalah kunci kesuksesan kita.",
+            hobby: "Bermain Musik",
+            imageUrl: "https://picsum.photos/seed/bunga/200",
+          },
+          {
+            id: 3,
+            name: "Cahyo Nugroho",
+            class: "XII IPA 3",
+            position: "Sekretaris 1",
+            quote: "Setiap detail adalah penting.",
+            hobby: "Menulis Cerpen",
+            imageUrl: "https://picsum.photos/seed/cahyo/200",
+          },
+          {
+            id: 4,
+            name: "Dewi Anggraini",
+            class: "XI IPS 1",
+            position: "Sekretaris 2",
+            quote: "Organisasi yang rapi dimulai dari administrasi yang baik.",
+            hobby: "Desain Grafis",
+            imageUrl: "https://picsum.photos/seed/dewi/200",
+          },
+          {
+            id: 5,
+            name: "Eka Wijaya",
+            class: "XII IPA 2",
+            position: "Bendahara 1",
+            quote: "Keuangan yang sehat adalah jantung organisasi.",
+            hobby: "Investasi Saham",
+            imageUrl: "https://picsum.photos/seed/eka/200",
+          },
+          {
+            id: 6,
+            name: "Fajar Maulana",
+            class: "XI IPA 1",
+            position: "Bendahara 2",
+            quote: "Transparansi membangun kepercayaan.",
+            hobby: "Bermain Catur",
+            imageUrl: "https://picsum.photos/seed/fajar/200",
+          },
+          {
+            id: 7,
+            name: "Gita Putri",
+            class: "XII IPS 3",
+            position: "Ketua Divisi Pendidikan",
+            quote: "Pendidikan adalah senjata paling ampuh.",
+            hobby: "Mengajar",
+            imageUrl: "https://picsum.photos/seed/gita/200",
+          },
+          {
+            id: 8,
+            name: "Hendra Gunawan",
+            class: "XI IPA 4",
+            position: "Anggota Divisi Pendidikan",
+            quote: "Belajar setiap hari, tumbuh setiap saat.",
+            hobby: "Menonton Dokumenter",
+            imageUrl: "https://picsum.photos/seed/hendra/200",
+          },
+          {
+            id: 9,
+            name: "Indah Permata",
+            class: "X-A",
+            position: "Anggota Divisi Pendidikan",
+            quote: "Ilmu adalah cahaya.",
+            hobby: "Puzzle",
+            imageUrl: "https://picsum.photos/seed/indah/200",
+          },
+          {
+            id: 10,
+            name: "Joko Susilo",
+            class: "XII IPA 1",
+            position: "Ketua Divisi Humas",
+            quote: "Komunikasi menyatukan kita semua.",
+            hobby: "Public Speaking",
+            imageUrl: "https://picsum.photos/seed/joko/200",
+          },
+          {
+            id: 11,
+            name: "Kartika Sari",
+            class: "XI IPS 2",
+            position: "Anggota Divisi Humas",
+            quote: "Senyum adalah jembatan terbaik.",
+            hobby: "Fotografi",
+            imageUrl: "https://picsum.photos/seed/kartika/200",
+          },
+          {
+            id: 12,
+            name: "Lutfi Hakim",
+            class: "X-B",
+            position: "Anggota Divisi Humas",
+            quote: "Jalin relasi, tebar inspirasi.",
+            hobby: "Vlogging",
+            imageUrl: "https://picsum.photos/seed/lutfi/200",
+          },
+          {
+            id: 13,
+            name: "Maya Sari",
+            class: "XII IPS 1",
+            position: "Ketua Divisi Kreatif",
+            quote: "Imajinasi tanpa batas.",
+            hobby: "Melukis Digital",
+            imageUrl: "https://picsum.photos/seed/maya/200",
+          },
+          {
+            id: 14,
+            name: "Nanda Kusuma",
+            class: "XI IPA 3",
+            position: "Anggota Divisi Kreatif",
+            quote: "Berpikir di luar kotak.",
+            hobby: "Membuat Kerajinan",
+            imageUrl: "https://picsum.photos/seed/nanda/200",
+          },
+          {
+            id: 15,
+            name: "Putri Amelia",
+            class: "XI IPS 3",
+            position: "Anggota Divisi Kreatif",
+            quote: "Setiap karya adalah cerita.",
+            hobby: "Menyanyi",
+            imageUrl: "https://picsum.photos/seed/putri/200",
+          },
+          {
+            id: 16,
+            name: "Rian Hidayat",
+            class: "XII IPA 4",
+            position: "Ketua Divisi Olahraga",
+            quote: "Sportivitas di atas segalanya.",
+            hobby: "Sepak Bola",
+            imageUrl: "https://picsum.photos/seed/rian/200",
+          },
+          {
+            id: 17,
+            name: "Sinta Bella",
+            class: "XI IPA 2",
+            position: "Anggota Divisi Olahraga",
+            quote: "Sehat itu investasi.",
+            hobby: "Bulu Tangkis",
+            imageUrl: "https://picsum.photos/seed/sinta/200",
+          },
+          {
+            id: 18,
+            name: "Taufik Rahman",
+            class: "X-C",
+            position: "Anggota Divisi Olahraga",
+            quote: "Keringat hari ini, kekuatan esok hari.",
+            hobby: "Bersepeda",
+            imageUrl: "https://picsum.photos/seed/taufik/200",
+          },
+          {
+            id: 19,
+            name: "Vina Lestari",
+            class: "XII IPS 2",
+            position: "Ketua Divisi Sosial",
+            quote: "Berbagi itu indah.",
+            hobby: "Relawan",
+            imageUrl: "https://picsum.photos/seed/vina/200",
+          },
+          {
+            id: 20,
+            name: "Wawan Setiawan",
+            class: "XI IPS 1",
+            position: "Anggota Divisi Sosial",
+            quote: "Peduli sesama, perkuat bangsa.",
+            hobby: "Hiking",
+            imageUrl: "https://picsum.photos/seed/wawan/200",
+          },
+          {
+            id: 21,
+            name: "Yulia Puspita",
+            class: "X-D",
+            position: "Anggota Divisi Sosial",
+            quote: "Kebaikan kecil berdampak besar.",
+            hobby: "Berkebun",
+            imageUrl: "https://picsum.photos/seed/yulia/200",
+          },
+          {
+            id: 22,
+            name: "Zainal Abidin",
+            class: "XII IPA 5",
+            position: "Anggota Kehormatan",
+            quote: "Terus berkarya dan menginspirasi.",
+            hobby: "Membaca Sejarah",
+            imageUrl: "https://picsum.photos/seed/zainal/200",
+          },
+          {
+            id: 23,
+            name: "Rina Marlina",
+            class: "XI IPA 5",
+            position: "Anggota Divisi Kreatif",
+            quote: "Wujudkan ide menjadi nyata.",
+            hobby: "Menari",
+            imageUrl: "https://picsum.photos/seed/rina/200",
+          },
+        ];
+
+        // --- ELEMEN DOM ---
+        const memberGrid = document.getElementById("member-grid");
+        const searchBar = document.getElementById("search-bar");
+        const noResults = document.getElementById("no-results");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarContent = document.getElementById("sidebar-content");
+        const closeSidebarBtn = document.getElementById("close-sidebar");
+        const overlay = document.getElementById("overlay");
+
+        // --- FUNGSI ---
+
+        /**
+         * Menampilkan anggota ke dalam grid
+         * @param {Array} membersToDisplay - Array objek anggota yang akan ditampilkan
+         */
+        const displayMembers = (membersToDisplay) => {
+          memberGrid.innerHTML = "";
+          if (membersToDisplay.length === 0) {
+            noResults.classList.remove("hidden");
+          } else {
+            noResults.classList.add("hidden");
+          }
+
+          membersToDisplay.forEach((member) => {
+            const memberCard = document.createElement("div");
+            memberCard.className =
+              "bg-white rounded-lg shadow-md p-4 flex flex-col items-center text-center transform hover:scale-105 hover:shadow-xl transition duration-300";
+            memberCard.innerHTML = `
+                        <img 
+                            src="${member.imageUrl}" 
+                            alt="Foto ${member.name}" 
+                            class="w-24 h-24 rounded-full object-cover border-4 border-sky-300 cursor-pointer"
+                            data-id="${member.id}"
+                        >
+                        <h3 class="mt-4 font-bold text-lg text-sky-800">${member.name}</h3>
+                        <p class="text-slate-600">${member.position}</p>
+                        <p class="text-sm text-slate-400 mt-1">${member.class}</p>
+                    `;
+            memberGrid.appendChild(memberCard);
+          });
+        };
+
+        /**
+         * Membuka sidebar dengan detail anggota
+         * @param {number} memberId - ID dari anggota yang diklik
+         */
+        const openSidebar = (memberId) => {
+          const member = members.find((m) => m.id === memberId);
+          if (member) {
+            sidebarContent.innerHTML = `
+                        <img src="${member.imageUrl}" alt="Foto ${member.name}" class="w-32 h-32 rounded-full object-cover border-4 border-sky-400 shadow-lg">
+                        <h2 class="text-2xl font-bold mt-4 text-sky-800">${member.name}</h2>
+                        <p class="text-lg text-slate-600">${member.position}</p>
+                        <p class="text-md text-slate-500 mb-6">${member.class}</p>
+
+                        <div class="text-left w-full space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-sky-600">Moto:</h4>
+                                <p class="text-slate-700 italic">"${member.quote}"</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sky-600">Hobi:</h4>
+                                <p class="text-slate-700">${member.hobby}</p>
+                            </div>
+                        </div>
+                    `;
+            sidebar.classList.remove("sidebar-closed");
+            sidebar.classList.add("sidebar-open");
+            overlay.classList.remove("hidden");
+          }
+        };
+
+        /**
+         * Menutup sidebar
+         */
+        const closeSidebar = () => {
+          sidebar.classList.remove("sidebar-open");
+          sidebar.classList.add("sidebar-closed");
+          overlay.classList.add("hidden");
+        };
+
+        // --- EVENT LISTENERS ---
+
+        // Pencarian
+        searchBar.addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const filteredMembers = members.filter(
+            (member) =>
+              member.name.toLowerCase().includes(searchTerm) ||
+              member.position.toLowerCase().includes(searchTerm)
+          );
+          displayMembers(filteredMembers);
+        });
+
+        // Klik pada foto anggota untuk membuka sidebar
+        memberGrid.addEventListener("click", (e) => {
+          if (e.target.tagName === "IMG" && e.target.dataset.id) {
+            const memberId = parseInt(e.target.dataset.id, 10);
+            openSidebar(memberId);
+          }
+        });
+
+        // Menutup sidebar
+        closeSidebarBtn.addEventListener("click", closeSidebar);
+        overlay.addEventListener("click", closeSidebar);
+
+        // --- INISIALISASI ---
+        displayMembers(members);
+      });
+    </script>
+  </body>
+</html>
